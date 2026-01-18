@@ -1,0 +1,90 @@
+#!/bin/bash
+
+main() {
+    if [ "$IS_WORKER" = "true" ]; then
+        exec "$@"
+    else
+        prepare_file_permissions
+        run_npm_build
+        prepare_storage
+        wait_for_db
+        run_migrations
+        optimize_app
+        run_server "$@"
+    fi
+}
+
+prepare_file_permissions() {
+    chmod a+x ./artisan
+}
+
+run_npm_build() {
+    echo "Installing NPM dependencies"
+    if [ -f "package.json" ]; then
+        echo "Running NPM clean install"
+        npm ci
+
+        echo "Running NPM build"
+        npm run build
+    else
+        echo "No package.json found, skipping NPM build"
+    fi
+}
+
+prepare_storage() {
+    echo "Preparing storage directories..."
+    
+    # Create required directories for Laravel
+    mkdir -p /usr/share/nginx/html/storage/framework/cache/data
+    mkdir -p /usr/share/nginx/html/storage/framework/sessions
+    mkdir -p /usr/share/nginx/html/storage/framework/views
+    mkdir -p /usr/share/nginx/html/storage/app/public
+    mkdir -p /usr/share/nginx/html/storage/logs
+    mkdir -p /usr/share/nginx/html/bootstrap/cache
+
+    # Set permissions for the storage directory
+    chown -R www-data:www-data /usr/share/nginx/html/storage
+    chmod -R 775 /usr/share/nginx/html/storage
+    
+    chown -R www-data:www-data /usr/share/nginx/html/bootstrap/cache
+    chmod -R 775 /usr/share/nginx/html/bootstrap/cache
+
+    # Remove existing symlink if exists
+    if [ -L "/usr/share/nginx/html/public/storage" ]; then
+        echo "Removing existing storage symlink..."
+        rm /usr/share/nginx/html/public/storage
+    fi
+
+    # Create the symlink
+    echo "Creating storage symlink..."
+    php artisan storage:link --force
+}
+
+wait_for_db() {
+    echo "Waiting for DB to be ready"
+    until ./artisan migrate:status 2>&1 | grep -q -E "(Migration table not found|Migration name)"; do
+        echo "Database not ready, waiting..."
+        sleep 1
+    done
+    echo "Database is ready!"
+}
+
+run_migrations() {
+    echo "Running migrations..."
+    ./artisan migrate --force
+}
+
+optimize_app() {
+    echo "Optimizing application..."
+    ./artisan optimize:clear
+    ./artisan config:cache
+    ./artisan route:cache
+    ./artisan view:cache
+}
+
+run_server() {
+    echo "Starting Octane server..."
+    exec /usr/local/bin/docker-php-entrypoint "$@"
+}
+
+main "$@"
