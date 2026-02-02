@@ -26,7 +26,7 @@ class CategoryController extends Controller
                 $categories = Category::query()
                     ->select(['id', 'name', 'slug', 'path', 'parent_id', 'level', 'sort_order', 'is_active', 'show_in_menu'])
                     ->whereNull('parent_id')
-                    ->where('is_active' , true)
+                    ->where('is_active', true)
                     ->where('show_in_menu', true)
                     ->orderBy('sort_order')
                     ->with([
@@ -69,14 +69,34 @@ class CategoryController extends Controller
                         'children' => function ($q) {
                             $q->select(['id', 'name', 'slug', 'path', 'parent_id', 'level', 'sort_order', 'is_active', 'show_in_menu'])
                                 ->orderBy('sort_order')
-                                ->orderBy('name')
-                                ->with([
-                                    'children' => function ($qq) {
-                                        $qq->select(['id', 'name', 'slug', 'path', 'parent_id', 'level', 'sort_order', 'is_active', 'show_in_menu'])
-                                            ->orderBy('sort_order')
-                                            ->orderBy('name');
-                                    }
-                                ]);
+                                ->orderBy('name');
+                        }
+                    ])
+                    ->get();
+
+                return $categories;
+            });
+
+            return $this->successResponse($data, "Category retrieved successfully");
+        } catch (Exception $e) {
+            return $this->errorResponse("Failed to retrieve category", 500, $e->getMessage());
+        }
+    }
+
+    public function indexAdminInput()
+    {
+        try {
+            $data = Cache::remember('categories-admin-input', now()->addMinutes(5), function () {
+                $categories = Category::query()
+                    ->select(['id', 'name', 'slug', 'path', 'parent_id', 'level', 'sort_order', 'is_active', 'show_in_menu'])
+                    ->whereNull('parent_id')
+                    ->orderBy('sort_order')
+                    ->orderBy('name')
+                    ->with([
+                        'children' => function ($q) {
+                            $q->select(['id', 'name', 'slug', 'path', 'parent_id', 'level', 'sort_order', 'is_active', 'show_in_menu'])
+                                ->orderBy('sort_order')
+                                ->orderBy('name');
                         }
                     ])
                     ->get();

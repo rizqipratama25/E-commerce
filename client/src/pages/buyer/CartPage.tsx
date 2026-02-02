@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -24,14 +24,27 @@ export default function CartPage() {
   const { mutate: deleteCartItem, isPending: isDeleting } = useDeleteCartItem();
   const { mutate: checkoutFromCart, isPending: isCheckoutLoading } = useCheckoutFromCart();
 
+  const [deleteTarget, setDeleteTarget] = useState<
+    | { type: "single"; item: CartItem }
+    | { type: "bulk"; items: CartItem[] }
+    | null
+  >(null);
+
   const items: CartItem[] = cart?.items ?? [];
 
   // selected item ids
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   // ===== inline note state
-  const [openNoteFor, setOpenNoteFor] = useState<number | null>(null); // cart_item_id
+  const [openNoteFor, setOpenNoteFor] = useState<number | null>(null);
   const [noteDraftById, setNoteDraftById] = useState<Record<number, string>>({});
+
+  // ===== delete state (biar tombol per item bisa disable)
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
+  const deletingIdsRef = useRef(deletingIds);
+  useEffect(() => {
+    deletingIdsRef.current = deletingIds;
+  }, [deletingIds]);
 
   // auto select all first load
   useEffect(() => {
@@ -85,19 +98,54 @@ export default function CartPage() {
     );
   };
 
-  const handleDelete = (item: CartItem) => {
-    const ok = window.confirm("Hapus produk dari keranjang?");
-    if (!ok) return;
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
 
-    deleteCartItem(item.id, {
-      onSuccess: () => {
-        setSelectedIds((prev) => prev.filter((x) => x !== item.id));
-        // kalau note panel sedang kebuka, tutup
-        if (openNoteFor === item.id) setOpenNoteFor(null);
-        toast.success("Produk dihapus");
-      },
-      onError: (e: any) => toast.error(e?.response?.data?.message ?? "Gagal hapus"),
-    });
+    const toastId = toast.loading("Menghapus produk...");
+
+    if (deleteTarget.type === "single") {
+      if (isDeleting || isCheckoutLoading) return;
+      if (deletingIdsRef.current.has(deleteTarget.item.id)) return;
+
+      const toastId = toast.loading("Menghapus produk...");
+
+      setDeletingIds((prev) => new Set(prev).add(deleteTarget.item.id));
+
+      deleteCartItem(deleteTarget.item.id, {
+        onSuccess: () => {
+          toast.success("Produk dihapus", { id: toastId });
+          setSelectedIds((prev) => prev.filter((x) => x !== deleteTarget.item.id));
+          setDeleteTarget(null);
+
+          if (openNoteFor === deleteTarget.item.id) setOpenNoteFor(null);
+        },
+        onError: (e: any) => {
+          toast.error(e?.response?.data?.message ?? "Gagal hapus produk", { id: toastId });
+        },
+      });
+    }
+
+    if (deleteTarget.type === "bulk") {
+      const itemsToDelete = deleteTarget.items;
+
+      let done = 0;
+      itemsToDelete.forEach((it) => {
+        deleteCartItem(it.id, {
+          onSuccess: () => {
+            done++;
+            setSelectedIds((prev) => prev.filter((x) => x !== it.id));
+            if (done === itemsToDelete.length) {
+              toast.success("Produk terpilih dihapus", { id: toastId });
+              setDeleteTarget(null);
+            }
+          },
+          onError: () => {
+            toast.error("Sebagian produk gagal dihapus", { id: toastId });
+            setDeleteTarget(null);
+          },
+        });
+      });
+    }
   };
 
   const handleCheckout = () => {
@@ -112,9 +160,7 @@ export default function CartPage() {
   // ===== inline note handlers
   const openInlineNote = (item: CartItem) => {
     setOpenNoteFor(item.id);
-
     setNoteDraftById((prev) => {
-      // kalau sudah ada draft, jangan overwrite
       if (typeof prev[item.id] === "string") return prev;
       return {
         ...prev,
@@ -164,11 +210,11 @@ export default function CartPage() {
 
       <main className="flex-1">
         <div className="mx-auto px-30 pt-35">
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-4">
               <h1 className="text-2xl font-bold text-gray-900 mb-6">Keranjang Belanja</h1>
+
               {/* Header pilih semua */}
               <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -177,6 +223,7 @@ export default function CartPage() {
                     className="w-5 h-5 accent-[#F26A24]"
                     checked={allSelected}
                     onChange={toggleSelectAll}
+                    disabled={isDeleting || isCheckoutLoading}
                   />
                   <span className="text-sm font-semibold text-gray-800">Pilih Semua</span>
                 </label>
@@ -184,13 +231,14 @@ export default function CartPage() {
                 <div className="text-sm text-[#F26A24] font-semibold flex items-center gap-4">
                   <button
                     type="button"
-                    className="hover:underline cursor-pointer"
+                    className="hover:underline cursor-pointer disabled:opacity-60"
                     onClick={() => {
-                      if (!selectedIds.length) return toast.error("Pilih produk yang mau dihapus");
-                      const ok = window.confirm("Hapus semua produk yang dicentang?");
-                      if (!ok) return;
-                      selectedItems.forEach((it) => handleDelete(it));
+                      if (!selectedItems.length) {
+                        return toast.error("Pilih produk yang mau dihapus");
+                      }
+                      setDeleteTarget({ type: "bulk", items: selectedItems });
                     }}
+                    disabled={!selectedIds.length || isDeleting || isCheckoutLoading}
                   >
                     Hapus Produk
                   </button>
@@ -220,6 +268,8 @@ export default function CartPage() {
                   const noteValue = noteDraftById[item.id] ?? (item.note ?? "");
                   const hasSavedNote = (item.note ?? "").trim().length > 0;
 
+                  const deletingThis = deletingIds.has(item.id);
+
                   return (
                     <div key={item.id} className="border-b border-gray-200 p-4">
                       <div className="flex gap-4">
@@ -230,13 +280,18 @@ export default function CartPage() {
                             className="w-5 h-5 accent-[#F26A24]"
                             checked={isChecked}
                             onChange={() => toggleSelectOne(item.id)}
+                            disabled={isDeleting || isCheckoutLoading || deletingThis}
                           />
                         </div>
 
                         {/* image */}
                         <div className="w-24 h-24 rounded-lg bg-gray-100 overflow-hidden">
                           {p?.thumbnail?.image ? (
-                            <img src={p.thumbnail.image} alt={p?.name ?? "Product"} className="w-full h-full object-cover" />
+                            <img
+                              src={p.thumbnail.image}
+                              alt={p?.name ?? "Product"}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
                               No Image
@@ -267,8 +322,11 @@ export default function CartPage() {
                             <div className="flex items-center gap-3">
                               <button
                                 type="button"
-                                onClick={() => handleDelete(item)}
-                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                                onClick={() =>
+                                  setDeleteTarget({ type: "single", item })
+                                }
+                                disabled={isDeleting || isCheckoutLoading || deletingThis}
+                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-60 cursor-pointer"
                                 title="Hapus"
                               >
                                 <Trash2 className="w-5 h-5 text-gray-700" />
@@ -278,8 +336,11 @@ export default function CartPage() {
                               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                                 <button
                                   type="button"
-                                  onClick={() => handleDecrease(item)}
-                                  disabled={isUpdating || item.qty <= 1}
+                                  onClick={() => {
+                                    handleDecrease(item)
+                                    if(item.qty <= 1) setDeleteTarget({type: "single", item})
+                                  }}
+                                  disabled={isUpdating || deletingThis || item.qty <= 1}
                                   className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 disabled:opacity-60"
                                 >
                                   –
@@ -290,7 +351,7 @@ export default function CartPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleIncrease(item)}
-                                  disabled={isUpdating}
+                                  disabled={isUpdating || deletingThis}
                                   className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 disabled:opacity-60"
                                 >
                                   +
@@ -299,12 +360,13 @@ export default function CartPage() {
                             </div>
                           </div>
 
-                          {/* ===== note section (ruparupa style) ===== */}
+                          {/* ===== note section ===== */}
                           {!noteOpen && (
                             <button
                               type="button"
-                              className="mt-3 text-sm text-[#F26A24] font-semibold hover:underline"
+                              className="mt-3 text-sm text-[#F26A24] font-semibold hover:underline disabled:opacity-60"
                               onClick={() => openInlineNote(item)}
+                              disabled={deletingThis}
                             >
                               {hasSavedNote ? "Ubah Catatan" : "Tambah Catatan"}
                             </button>
@@ -320,14 +382,15 @@ export default function CartPage() {
                                 onChange={(e) => onChangeNote(item.id, e.target.value)}
                                 placeholder="Contoh: Tolong bungkus rapi ya..."
                                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#F26A24]"
+                                disabled={deletingThis}
                               />
 
                               <div className="flex items-center justify-between mt-1">
                                 <button
                                   type="button"
-                                  className="text-sm text-[#F26A24] font-semibold hover:underline"
+                                  className="text-sm text-[#F26A24] font-semibold hover:underline disabled:opacity-60"
                                   onClick={() => saveNote(item.id)}
-                                  disabled={isUpdating}
+                                  disabled={isUpdating || deletingThis}
                                 >
                                   {isUpdating ? "Menyimpan..." : "Simpan Catatan"}
                                 </button>
@@ -339,16 +402,15 @@ export default function CartPage() {
 
                               <button
                                 type="button"
-                                className="mt-2 text-xs text-gray-400 hover:text-gray-600"
+                                className="mt-2 text-xs text-gray-400 hover:text-gray-600 disabled:opacity-60"
                                 onClick={() => closeInlineNote(item.id)}
-                                disabled={isUpdating}
+                                disabled={isUpdating || deletingThis}
                               >
                                 Batal
                               </button>
                             </div>
                           )}
 
-                          {/* preview catatan kalau sudah tersimpan */}
                           {!noteOpen && hasSavedNote && (
                             <div className="mt-2 text-xs text-gray-600">
                               <span className="font-semibold">Catatan:</span>{" "}
@@ -398,6 +460,7 @@ export default function CartPage() {
                   onClick={handleCheckout}
                   disabled={
                     isCheckoutLoading ||
+                    isDeleting ||
                     selectedCount === 0 ||
                     selectedItems.some((it) => !it.product?.is_active)
                   }
@@ -416,6 +479,37 @@ export default function CartPage() {
           </div>
         </div>
       </main>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteTarget(null)} />
+
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-5 relative">
+            <h3 className="text-lg font-bold mb-2">Hapus Produk</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {deleteTarget.type === "single"
+                ? "Produk ini akan dihapus dari keranjang."
+                : `Hapus ${deleteTarget.items.length} produk terpilih dari keranjang?`}
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 border rounded cursor-pointer"
+                onClick={() => setDeleteTarget(null)}
+              >
+                Batal
+              </button>
+              <button
+                className="px-4 py-2 bg-[#F26A24] text-white rounded cursor-pointer"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Menghapus..." : "Hapus"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

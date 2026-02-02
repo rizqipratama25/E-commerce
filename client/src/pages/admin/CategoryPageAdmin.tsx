@@ -22,12 +22,16 @@ import {
     isInvalidParentSelection,
     type FlatCategoryRow,
 } from "../../utils/category.utils";
+import { useMegaMenuCategories } from "../../hooks/category/useMegaMenuCategories";
 
 const CategoryPageAdmin = () => {
     const { data: categoriesResponse, isLoading: isCategoriesLoading } = useAdminCategories();
+    const { data: categoriesMegaResponse, isLoading: isCategoriesMegaLoading } = useMegaMenuCategories();
     const categories = categoriesResponse ?? [];
+    const categoriesMega = categoriesMegaResponse ?? [];
 
-    const flatRows: FlatCategoryRow[] = useMemo(() => flattenCategories(categories), [categories]);
+    const flatRows: FlatCategoryRow[] = useMemo(() => flattenCategories(categoriesMega), [categoriesMega]);
+    const flatInput: FlatCategoryRow[] = useMemo(() => flattenCategories(categories), [categories]);
 
     const { mutate: createCategory, isPending: isCreatingCategory } = useCreateCategory();
     const { mutate: updateCategory, isPending: isUpdatingCategory } = useUpdateCategory();
@@ -56,8 +60,8 @@ const CategoryPageAdmin = () => {
         });
 
     const parentOptions = useMemo(
-        () => buildParentOptionsAdvanced(categories, flatRows, editingId),
-        [categories, flatRows, editingId]
+        () => buildParentOptionsAdvanced(categories, flatInput, editingId),
+        [categories, flatInput, editingId]
     );
 
     const handleDeleteCategory = buildHandleDeleteCategory(deleteCategory);
@@ -168,6 +172,7 @@ const CategoryPageAdmin = () => {
     };
 
     if (isCategoriesLoading) return <div>Loading...</div>;
+    if (isCategoriesMegaLoading) return <div>Loading...</div>;
 
     return (
         <>
