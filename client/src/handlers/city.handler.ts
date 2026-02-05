@@ -34,6 +34,8 @@ export const buildHandleSubmitNewCity =
     ) => (e: FormEvent) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Menambah kota...");
+
         createCity(
             {
                 name: form.name,
@@ -41,7 +43,7 @@ export const buildHandleSubmitNewCity =
             },
             {
                 onSuccess: () => {
-                    toast.success("Kota berhasil ditambahkan!");
+                    toast.success("Kota berhasil ditambahkan!", {id: toastId});
                     helpers.setShowAddModal(false);
                     helpers.resetForm();
                 },
@@ -78,6 +80,8 @@ export const buildHandleSubmitEditCity =
         e.preventDefault();
         if (!editingId) return;
 
+        const toastId = toast.loading("Mengubah kota...");
+
         updateCity(
             {
                 id: editingId,
@@ -88,7 +92,7 @@ export const buildHandleSubmitEditCity =
             },
             {
                 onSuccess: () => {
-                    toast.success("Kota berhasil diupdate!");
+                    toast.success("Kota berhasil diubah!", {id: toastId});
                     helpers.setShowEditModal(false);
                     helpers.setEditingId(null);
                     helpers.resetForm();

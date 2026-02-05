@@ -45,8 +45,10 @@ export const buildHandleSubmitNewCategory =
   ) =>
     (e: FormEvent) => {
       e.preventDefault();
-
+      
       const parentId = form.parent_id === "" ? null : Number(form.parent_id);
+      
+      const toastId = toast.loading("Menambah kategori...");
 
       createCategory(
         {
@@ -57,7 +59,7 @@ export const buildHandleSubmitNewCategory =
         },
         {
           onSuccess: () => {
-            toast.success("Kategori berhasil ditambahkan!");
+            toast.success("Kategori berhasil ditambahkan!", { id: toastId });
             helpers.setShowAddModal(false);
             helpers.resetForm();
             helpers.setEditingId(null);
@@ -67,7 +69,7 @@ export const buildHandleSubmitNewCategory =
               error.response?.data?.errors ||
               error.response?.data?.message ||
               "Terjadi kesalahan saat menambah kategori.";
-            toast.error(message);
+            toast.error(message, { id: toastId });
           },
         }
       );
@@ -94,6 +96,8 @@ export const buildHandleSubmitEditCategory =
 
       const parentId = form.parent_id === "" ? null : Number(form.parent_id);
 
+      const toastId = toast.loading("Mengubah kategori...");
+
       updateCategory(
         {
           id: editingId,
@@ -106,7 +110,7 @@ export const buildHandleSubmitEditCategory =
         },
         {
           onSuccess: () => {
-            toast.success("Kategori berhasil diupdate!");
+            toast.success("Kategori berhasil diubah!", { id: toastId });
             helpers.setShowEditModal(false);
             helpers.setEditingId(null);
             helpers.resetForm();
@@ -115,8 +119,8 @@ export const buildHandleSubmitEditCategory =
             const message =
               error.response?.data?.errors ||
               error.response?.data?.message ||
-              "Terjadi kesalahan saat mengupdate kategori.";
-            toast.error(message);
+              "Terjadi kesalahan saat mengubah kategori.";
+            toast.error(message, { id: toastId });
           },
         }
       );

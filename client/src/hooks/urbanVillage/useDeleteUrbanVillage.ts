@@ -7,7 +7,7 @@ export const useDeleteUrbanVillage = () => {
     return useMutation({
         mutationFn: async (id: number) => deleteUrbanVillage(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['urbanVillages']});
+            queryClient.invalidateQueries({queryKey: ['urban-villages']});
         },
     });
 }

@@ -18,11 +18,12 @@ export const buildHandleBuyNow = ( buyNowMutate: any, navigate: NavigateFunction
             onError: (error: any) => {
                 const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat checkout.";
 
-                if (message === "Unauthenticated") {
+                if (message == "Unauthenticated") {
                     navigate("/auth/login");
+                    toast.error("Silahkan login terlebih dahulu", {id: toastId});
                 }
 
-                toast.error(message);
+                toast.error(message, {id: toastId});
             }
         }
     )

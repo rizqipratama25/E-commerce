@@ -33,6 +33,7 @@ import AddressPartnerPage from './pages/partner/AddressPartnerPage.tsx'
 import AddressPage from './pages/buyer/AddressPage.tsx'
 import PaymentMethodPage from './pages/buyer/PaymentMethodPage.tsx'
 import PaymentDetailPage from './pages/buyer/PaymentDetailPage.tsx'
+import { Toaster } from 'react-hot-toast'
 
 const queryClient = new QueryClient()
 
@@ -116,6 +117,7 @@ if (token) {
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
+    <Toaster position="bottom-right" reverseOrder={false} />
     <RouterProvider router={router} />
   </QueryClientProvider>,
 )

@@ -5,6 +5,6 @@ export const useUrbanVillages = (districtId?: number) => {
   return useQuery({
     queryKey: ["urban-villages", districtId],
     queryFn: () => getUrbanVillages(districtId),
-    enabled: !!districtId,
+    enabled: districtId === undefined || !!districtId,
   });
 };

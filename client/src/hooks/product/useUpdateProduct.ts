@@ -15,6 +15,7 @@ export const useUpdateProduct = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({queryKey: ['products', 'partner']});
             queryClient.invalidateQueries({queryKey: ['product-detail', data.slug]});
+            queryClient.invalidateQueries({queryKey: ['products']});
         },
     });
 }

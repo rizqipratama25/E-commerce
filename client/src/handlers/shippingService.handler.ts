@@ -37,6 +37,8 @@ export const buildHandleSubmitNewShippingService =
     ) => (e: FormEvent) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Menambah jasa pengiriman...");
+
         createShippingService(
             {
                 courier_code: form.courier_code,
@@ -50,14 +52,14 @@ export const buildHandleSubmitNewShippingService =
             },
             {
                 onSuccess: () => {
-                    toast.success("Jasa pengiriman berhasil ditambahkan!");
+                    toast.success("Jasa pengiriman berhasil ditambahkan!", { id: toastId });
                     helpers.setShowAddModal(false);
                     helpers.resetForm();
                 },
                 onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat menambahkan jasa pengiriman.";
 
-                    toast.error(message);
+                    toast.error(message, {id: toastId});
                 }
             },            
         )
@@ -87,6 +89,8 @@ export const buildHandleSubmitEditShippingService =
         e.preventDefault();
         if (!editingId) return;
 
+        const toastId = toast.loading("Mengubah jasa pengiriman...");
+
         updateShippingService(
             {
                 id: editingId,
@@ -103,7 +107,7 @@ export const buildHandleSubmitEditShippingService =
             },
             {
                 onSuccess: () => {
-                    toast.success("Jasa pengiriman berhasil diupdate!");
+                    toast.success("Jasa pengiriman berhasil diupdate!", {id: toastId});
                     helpers.setShowEditModal(false);
                     helpers.setEditingId(null);
                     helpers.resetForm();
@@ -111,7 +115,7 @@ export const buildHandleSubmitEditShippingService =
                 onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat mengupdate jasa pengiriman.";
 
-                    toast.error(message);
+                    toast.error(message, {id: toastId});
                 }
             },
         )

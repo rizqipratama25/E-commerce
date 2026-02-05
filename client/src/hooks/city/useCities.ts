@@ -5,6 +5,6 @@ export const useCities = (provinceId?: number) => {
   return useQuery({
     queryKey: ["cities", provinceId],
     queryFn: () => getCities(provinceId),
-    enabled: !!provinceId,
+    enabled: provinceId === undefined || !!provinceId,
   });
 };

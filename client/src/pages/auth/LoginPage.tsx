@@ -23,7 +23,7 @@ const LoginPage = () => {
             },
             {
                 onSuccess: () => {
-                    toast.success("Login Success!");
+                    toast.success("Berhasil login!");
                     const user = getUser();
 
                     if (user?.role === 'Admin') {
@@ -34,8 +34,8 @@ const LoginPage = () => {
                         navigate('/');
                     }
                 },
-                onError: (error: any) => {
-                    const message = error.response?.data?.message ?? error.message ?? "Email atau password salah";
+                onError: () => {
+                    const message = "Email atau password salah";
                     toast.error(message);
                 }
             }

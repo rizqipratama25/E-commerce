@@ -1,7 +1,7 @@
 import { Edit, Plus, Trash2, X } from "lucide-react"
 import TitleRoutesAdminPartner from "../../components/TitleRoutesAdminPartner"
 import { useDistricts } from "../../hooks/district/useDistricts";
-import { useState, type ChangeEvent } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { useCreateDistrict } from "../../hooks/district/useCreateDistrict";
 import { buildHandleDeleteDistrict, buildHandleFormChange, buildHandleSubmitEditDistrict, buildHandleSubmitNewDistrict } from "../../handlers/district.handler";
 import { useDeleteDistrict } from "../../hooks/district/useDeleteDistrict";
@@ -45,12 +45,14 @@ const DistrictPage = () => {
     setDeleteTarget(null);
   }
 
+  const provinceId = useMemo(() => Number(form.province_id || 0), [form.province_id]);
+
   // Get Province
   const { data: provincesResponse, isLoading: isProvinceLoading } = useProvinces();
   const provinces = provincesResponse ?? [];
 
   // Get City
-  const { data: citiesResponse, isLoading: isCityLoading } = useCities();
+  const { data: citiesResponse, isLoading: isCityLoading } = useCities(provinceId);
   const cities = citiesResponse ?? [];
 
   // Reset Form

@@ -21,8 +21,9 @@ class UrbanVillageController extends Controller
             $districtId = $request->query('district_id');
 
             if (!$districtId) {
-                $data = Cache::remember('urban-villages:all', now()->addMinutes(30), function () {
-                    return UrbanVillage::orderBy('name')->get();
+                $data = Cache::tags('urban-villages')->remember('urban-villages:all', now()->addMinutes(30), function () {
+                    $data = UrbanVillage::orderBy('name')->get();
+                    return UrbanVillageResource::collection($data);
                 });
                 return $this->successResponse($data, "Urban villages retrieved successfully");
             }
@@ -32,7 +33,7 @@ class UrbanVillageController extends Controller
             }
 
             $cacheKey = "urban-villages:district:$districtId";
-            $data = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($districtId) {
+            $data = Cache::tags('urban-villages')->remember($cacheKey, now()->addMinutes(30), function () use ($districtId) {
                 return UrbanVillage::where('district_id', $districtId)
                     ->orderBy('name')
                     ->get();
@@ -50,7 +51,7 @@ class UrbanVillageController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Cache::has("urban-villages")) Cache::forget("urban-villages");
+            Cache::tags('urban-villages')->flush();
 
             $validate = $request->validate([
                 "name" => "required|string|max:255",
@@ -81,7 +82,7 @@ class UrbanVillageController extends Controller
     public function update(Request $request, UrbanVillage $urbanVillage)
     {
         try {
-            if (Cache::has("urban-villages")) Cache::forget("urban-villages");
+            Cache::tags('urban-villages')->flush();
 
             $validate = $request->validate([
                 "name" => "sometimes|string|max:255",
@@ -105,7 +106,7 @@ class UrbanVillageController extends Controller
     public function destroy(UrbanVillage $urbanVillage)
     {
         try {
-            if (Cache::has("urban-villages")) Cache::forget("urban-villages");
+            Cache::tags('urban-villages')->flush();
 
             $urbanVillage->delete();
 

@@ -32,6 +32,8 @@ export const buildHandleSubmitNewUrbanVillage =
     ) => (e: any) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Menambah kelurahan...");
+
         createUrbanVillage(
             {
                 name: form.name,
@@ -42,6 +44,7 @@ export const buildHandleSubmitNewUrbanVillage =
             },
             {
                 onSuccess: () => {
+                    toast.success("Kelurahan berhasil ditambahkan!", { id: toastId });
                     helpers.setShowAddModal(false);
                     helpers.resetForm();
                 },
@@ -72,6 +75,8 @@ export const buildHandleSubmitEditUrbanVillage =
         e.preventDefault();
         if (!editingId) return;
 
+        const toastId = toast.loading("Mengubah kelurahan...");
+
         updateUrbanVillage(
             {
                 id: editingId,
@@ -85,6 +90,7 @@ export const buildHandleSubmitEditUrbanVillage =
             },
             {
                 onSuccess: () => {
+                    toast.success("Kelurahan berhasil diubah!", { id: toastId });
                     helpers.setShowEditModal(false);
                     helpers.setEditingId(null);
                     helpers.resetForm();

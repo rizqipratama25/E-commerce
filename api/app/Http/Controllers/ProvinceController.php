@@ -17,7 +17,7 @@ class ProvinceController extends Controller
     public function index()
     {
         try {
-            $data = Cache::remember('provinces', now()->addMinutes(5), function () {
+            $data = Cache::tags('provinces')->remember('provinces', now()->addMinutes(5), function () {
                 $provinces = Province::latest()->get();
                 return $provinces;
             });
@@ -34,7 +34,7 @@ class ProvinceController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Cache::has("provinces")) Cache::forget("provinces");
+            Cache::tags('provinces')->flush();
 
             $validate = $request->validate([
                 "name" => "required|string|max:255|unique:provinces,name"
@@ -61,7 +61,7 @@ class ProvinceController extends Controller
     public function update(Request $request, Province $province)
     {
         try {
-            if (Cache::has("provinces")) Cache::forget("provinces");
+            Cache::tags('provinces')->flush();
 
             $validate = $request->validate([
                 "name" => "required|string|max:255|unique:provinces,name,{$province->id}"
@@ -81,7 +81,7 @@ class ProvinceController extends Controller
     public function destroy(Province $province)
     {
         try {
-            if (Cache::has("provinces")) Cache::forget("provinces");
+            Cache::tags('provinces')->flush();
 
             $province->delete();
 

@@ -423,15 +423,6 @@ export default function ProductPage() {
                                                 <Edit size={18} /> Edit Produk
                                             </span>
                                         </button>
-
-                                        <button
-                                            className="px-4 py-2 border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50"
-                                            onClick={() => handleConfirmDelete()}
-                                        >
-                                            <span className="inline-flex items-center gap-2">
-                                                <Trash2 size={18} /> Hapus
-                                            </span>
-                                        </button>
                                     </div>
                                 </>
                             )}
@@ -548,7 +539,7 @@ export default function ProductPage() {
                                         <input
                                             ref={addFileInputRef}
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpg, image/jpeg, image/png"
                                             multiple
                                             className="hidden"
                                             onChange={handleImagesChange}

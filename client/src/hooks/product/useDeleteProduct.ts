@@ -8,6 +8,7 @@ export const useDeleteProduct = () => {
         mutationFn: async (slug: string) => deleteProduct(slug),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["products", "partner"]});
+            queryClient.invalidateQueries({queryKey: ['products']});
         },
     });
 };

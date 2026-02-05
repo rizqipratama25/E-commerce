@@ -25,7 +25,7 @@ class ReleaseOrderPayoutsJob implements ShouldQueue
         $query = OrderPayout::query()
             ->where('status', 'holding')
             ->whereNotNull('release_scheduled_at')
-            ->where('release_scheduled_at', '<=', now())
+            ->where('release_scheduled_at', '>=', now())
             ->where('recipient_type', 'partner')
             ->orderBy('release_scheduled_at')
             ->limit(50);
@@ -52,10 +52,6 @@ class ReleaseOrderPayoutsJob implements ShouldQueue
 
                 if (!$order) return;
 
-                // NOTE:
-                // Kamu bisa pilih rule: release payout walau order belum "completed" (karena shipment delivered + H+2)
-                // Jadi jangan paksa order.status === completed.
-                // Kalau kamu mau ketat, cek minimal order.status in ['delivered','completed'].
                 if (!in_array($order->status, ['delivered', 'completed'], true)) {
                     return;
                 }
@@ -101,7 +97,7 @@ class ReleaseOrderPayoutsJob implements ShouldQueue
 
                 WalletTransaction::create([
                     'wallet_id' => $adminWallet->id,
-                    'type' => 'debit', // ✅ FIX dari "debt"
+                    'type' => 'debit',
                     'amount' => $amount,
                     'balance_after' => $adminAfter,
                     'reference_type' => $refType,

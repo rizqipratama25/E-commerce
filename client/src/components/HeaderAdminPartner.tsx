@@ -1,5 +1,3 @@
-import { Bell } from "lucide-react"
-
 interface Props {
     fullname: string;
     email: string;
@@ -14,10 +12,6 @@ const HeaderAdminPartner = ({fullname, email}: Props) => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-                        <Bell size={20} />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-[#F26A24] rounded-full"></span>
-                    </button>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-[#F26A24] rounded-full flex items-center justify-center text-white font-semibold">
                             A

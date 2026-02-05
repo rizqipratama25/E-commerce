@@ -96,11 +96,6 @@ export default function NavbarMegaMenu({ headerHeight }: Props) {
               </Link>
             </div>
           ))}
-
-        {/* statis */}
-        <a className="text-gray-700 hover:text-[#F26A24] whitespace-nowrap" href="#">
-          Rumah Tangga
-        </a>
       </div>
 
       {/* Dropdown panel */}

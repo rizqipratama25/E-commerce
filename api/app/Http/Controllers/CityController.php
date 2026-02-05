@@ -21,8 +21,9 @@ class CityController extends Controller
             $provinceId = $request->query('province_id');
 
             if (!$provinceId) {
-                $data = Cache::remember('cities:all', now()->addMinutes(30), function () {
-                    return City::orderBy('name')->get();
+                $data = Cache::tags('cities')->remember('cities:all', now()->addMinutes(30), function () {
+                    $data = City::orderBy('name')->get();
+                    return CityResource::collection($data)->resolve();
                 });
                 return $this->successResponse($data, "Cities retrieved successfully");
             }
@@ -32,7 +33,7 @@ class CityController extends Controller
             }
 
             $cacheKey = "cities:province:$provinceId";
-            $data = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($provinceId) {
+            $data = Cache::tags('cities')->remember($cacheKey, now()->addMinutes(30), function () use ($provinceId) {
                 return City::where('province_id', $provinceId)
                     ->orderBy('name')
                     ->get();
@@ -50,7 +51,7 @@ class CityController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Cache::has("cities")) Cache::forget("cities");
+            Cache::tags('cities')->flush();
 
             $validate = $request->validate([
                 "name" => "required|string|max:255|unique:cities,name",
@@ -78,7 +79,7 @@ class CityController extends Controller
     public function update(Request $request, City $city)
     {
         try {
-            if (Cache::has("cities")) Cache::forget("cities");
+            Cache::tags('cities')->flush();
 
             $validate = $request->validate([
                 "name" => "sometimes|string|max:255|unique:cities,name,{$city->id}",
@@ -93,13 +94,13 @@ class CityController extends Controller
         }
     }
 
-    /**
+    /**o
      * Remove the specified resource from storage.
      */
     public function destroy(City $city)
     {
         try {
-            if (Cache::has("cities")) Cache::forget("cities");
+            Cache::tags('cities')->flush();
 
             $city->delete();
 

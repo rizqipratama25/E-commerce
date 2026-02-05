@@ -133,10 +133,13 @@ export const buildHandleSubmitNewProduct =
         (e: FormEvent) => {
             e.preventDefault();
 
-            if (!form.category_id) {
-                toast.error("Kategori wajib dipilih.");
+
+            if (!form.name || !form.price || !form.stock || !form.product_specification || !form.product_information || !form.category_id || !form.height || !form.width || !form.length || !form.weight) {
+                toast.error("Harap isi semua input");
                 return;
             }
+
+            const toastId = toast.loading("Menambah produk...");
 
             createProduct(
                 {
@@ -145,7 +148,7 @@ export const buildHandleSubmitNewProduct =
                 },
                 {
                     onSuccess: () => {
-                        toast.success("Produk berhasil dibuat!");
+                        toast.success("Produk berhasil dibuat!", { id: toastId });
                         helpers.closeAdd();
                     },
                     onError: (err: any) => {
@@ -158,7 +161,7 @@ export const buildHandleSubmitNewProduct =
                             return;
                         }
 
-                        toast.error(err?.response?.data?.message ?? "Gagal membuat produk");
+                        toast.error(err?.response?.data?.message ?? "Gagal membuat produk", { id: toastId });
                     },
                 }
             );
@@ -187,22 +190,24 @@ export const buildHandleSubmitEditProduct =
 
             if (!selectedSlug) return;
 
-            if (!form.category_id) {
-                toast.error("Kategori wajib dipilih.");
+            if (!form.name || !form.price || !form.stock || !form.product_specification || !form.product_information || !form.category_id || !form.height || !form.width || !form.length || !form.weight) {
+                toast.error("Harap isi semua input");
                 return;
             }
+
+            const toastId = toast.loading("Mengubah produk...");
 
             updateProduct(
                 { slug: selectedSlug, product: buildCreateProductPayload(form), images: newImages },
                 {
                     onSuccess: () => {
-                        toast.success("Produk berhasil diupdate!");
+                        toast.success("Produk berhasil diubah!", { id: toastId });
                         helpers.setShowEditModal(false);
                         helpers.setSelectedSlug("");
                         helpers.resetAllState();
                     },
                     onError: (err: any) => {
-                        toast.error(err?.response?.data?.message ?? "Gagal update produk");
+                        toast.error(err?.response?.data?.message ?? "Gagal update produk", { id: toastId });
                     },
                 }
             );

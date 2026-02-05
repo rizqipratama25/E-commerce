@@ -32,6 +32,8 @@ export const buildHandleSubmitNewDistrict =
     ) => (e: FormEvent) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Menambah kecamatan...");
+
         createDistrict(
             {
                 name: form.name,
@@ -40,14 +42,14 @@ export const buildHandleSubmitNewDistrict =
             },
             {
                 onSuccess: () => {
-                    toast.success("Kecamatan berhasil ditambahkan!");
+                    toast.success("Kecamatan berhasil ditambahkan!", {id: toastId});
                     helpers.setShowAddModal(false);
                     helpers.resetForm();
                 },
                 onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat menambahkan kecamatan.";
 
-                    toast.error(message);
+                    toast.error(message, {id: toastId});
                 }
             },
         )
@@ -77,6 +79,8 @@ export const buildHandleSubmitEditDistrict =
         e.preventDefault();
         if (!editingId) return;
 
+        const toastId = toast.loading("Mengubah kecamatan...");
+
         updateDistrict(
             {
                 id: editingId,
@@ -88,7 +92,7 @@ export const buildHandleSubmitEditDistrict =
             },
             {
                 onSuccess: () => {
-                    toast.success("Kecamatan berhasil diupdate!");
+                    toast.success("Kecamatan berhasil diubah!", {id: toastId});
                     helpers.setShowEditModal(false);
                     helpers.setEditingId(null);
                     helpers.resetForm();
@@ -96,7 +100,7 @@ export const buildHandleSubmitEditDistrict =
                 onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat mengupdate kecamatan.";
 
-                    toast.error(message);
+                    toast.error(message, {id: toastId});
                 }
             },
         )

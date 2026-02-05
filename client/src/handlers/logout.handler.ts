@@ -11,7 +11,7 @@ export const buildHandleLogout = (
 
         logout(undefined, {
             onSuccess: () => {
-                toast.success("Logout Success!");
+                toast.success("Berhasil logout!");
 
                 if (window.location.pathname === "/") {
                     window.location.reload();

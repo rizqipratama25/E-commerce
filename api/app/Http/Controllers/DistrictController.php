@@ -21,8 +21,9 @@ class DistrictController extends Controller
             $cityId = $request->query('city_id');
 
             if (!$cityId) {
-                $data = Cache::remember('districts:all', now()->addMinutes(30), function () {
-                    return District::orderBy('name')->get();
+                $data = Cache::tags('districts')->remember('districts:all', now()->addMinutes(30), function () {
+                    $data = District::orderBy('name')->get();
+                    return DistrictResource::collection($data)->resolve();
                 });
                 return $this->successResponse($data, "Districts retrieved successfully");
             }
@@ -32,7 +33,7 @@ class DistrictController extends Controller
             }
 
             $cacheKey = "districts:city:$cityId";
-            $data = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($cityId) {
+            $data = Cache::tags('districts')->remember($cacheKey, now()->addMinutes(30), function () use ($cityId) {
                 return District::where('city_id', $cityId)
                     ->orderBy('name')
                     ->get();
@@ -50,7 +51,7 @@ class DistrictController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Cache::has("districts")) Cache::forget("districts");
+            Cache::tags('districts')->flush();
 
             $validate = $request->validate([
                 "name" => "required|string|max:255",
@@ -79,7 +80,7 @@ class DistrictController extends Controller
     public function update(Request $request, District $district)
     {
         try {
-            if (Cache::has("districts")) Cache::forget("districts");
+            Cache::tags('districts')->flush();
 
             $validate = $request->validate([
                 "name" => "sometimes|string|max:255|unique:districts,name",
@@ -101,7 +102,7 @@ class DistrictController extends Controller
     public function destroy(District $district)
     {
         try {
-            if (Cache::has("districts")) Cache::forget("districts");
+            Cache::tags('districts')->flush();
 
             $district->delete();
 

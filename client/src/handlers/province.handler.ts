@@ -31,20 +31,22 @@ export const buildHandleSubmitNewProvince =
     ) => (e: FormEvent) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Menambah provinsi...");
+
         createProvince(
             {
                 name: form.name,
             },
             {
                 onSuccess: () => {
-                    toast.success("Provinsi berhasil ditambahkan!");
+                    toast.success("Provinsi berhasil ditambahkan!", { id: toastId });
                     helpers.setShowAddModal(false);
                     helpers.resetForm();
                 },
                 onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat mengupdate provinsi.";
 
-                    toast.error(message);
+                    toast.error(message, { id: toastId });
                 }
             },
         )
@@ -75,6 +77,8 @@ export const buildHandleSubmitEditProvince =
     ) => (e: FormEvent) => {
         e.preventDefault();
 
+        const toastId = toast.loading("Mengubah provinsi...");
+
         updateProvince(
             {
                 id: editingId!,
@@ -84,7 +88,7 @@ export const buildHandleSubmitEditProvince =
             },
             {
                 onSuccess: () => {
-                    toast.success("Provinsi berhasil diupdate!");
+                    toast.success("Provinsi berhasil diubah!", { id: toastId });
                     helpers.setShowEditModal(false);
                     helpers.setEditingId(null);
                     helpers.resetForm();
@@ -92,7 +96,7 @@ export const buildHandleSubmitEditProvince =
             onError: (error: any) => {
                     const message = error.response?.data?.errors || error.response?.data?.message || "Terjadi kesalahan saat mengupdate provinsi.";
 
-                    toast.error(message);
+                    toast.error(message, { id: toastId });
                 }
             },
         )

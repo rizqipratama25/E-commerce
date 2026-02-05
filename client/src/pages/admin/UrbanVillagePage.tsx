@@ -2,7 +2,7 @@ import { Edit, Plus, Trash2, X } from "lucide-react";
 import type { UrbanVillage } from "../../services/urbanVillage.service";
 import { useUrbanVillages } from "../../hooks/urbanVillage/useUrbanVillages";
 import { useCreateUrbanVillage } from "../../hooks/urbanVillage/useCreateUrbanVillage";
-import { useState, type ChangeEvent } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { useUpdateUrbanVillage } from "../../hooks/urbanVillage/useUpdateUrbanVillage";
 import { useDeleteUrbanVillage } from "../../hooks/urbanVillage/useDeleteUrbanVillage";
 import TitleRoutesAdminPartner from "../../components/TitleRoutesAdminPartner";
@@ -56,16 +56,19 @@ const UrbanVillagePage = () => {
         setDeleteTarget(null);
     }
 
+    const provinceId = useMemo(() => Number(form.province_id || 0), [form.province_id]);
+    const cityId = useMemo(() => Number(form.city_id || 0), [form.city_id]);
+
     // Get Province
     const { data: provincesResponse, isLoading: isProvinceLoading } = useProvinces();
     const provinces = provincesResponse ?? [];
 
     // Get City
-    const { data: citiesResponse, isLoading: isCityLoading } = useCities();
+    const { data: citiesResponse, isLoading: isCityLoading } = useCities(provinceId);
     const cities = citiesResponse ?? [];
 
     // Get District
-    const { data: districtsResponse, isLoading: isDistrictLoading } = useDistricts();
+    const { data: districtsResponse, isLoading: isDistrictLoading } = useDistricts(cityId);
     const districts = districtsResponse ?? [];
 
     const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => buildHandleFormChange(e, setForm);
@@ -179,6 +182,7 @@ const UrbanVillagePage = () => {
                                 onChange={handleFormChange}
                                 placeholder="Kode Pos"
                                 className="w-full border rounded-lg p-2"
+                                maxLength={5}
                                 required
                             />
 
@@ -192,7 +196,7 @@ const UrbanVillagePage = () => {
                             >
                                 <option value="">
                                     {isProvinceLoading
-                                        ? "Memuat Provinsi..."
+                                            ? "Memuat Provinsi..."
                                         : "Pilih Provinsi"}
                                 </option>
 

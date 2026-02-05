@@ -5,6 +5,6 @@ export const useDistricts = (cityId?: number) => {
   return useQuery({
     queryKey: ["districts", cityId],
     queryFn: () => getDistricts(cityId),
-    enabled: !!cityId,
+    enabled: cityId === undefined || !!cityId,
   });
 };

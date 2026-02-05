@@ -7,7 +7,7 @@ export const useCreateUrbanVillage = () => {
     return useMutation({
         mutationFn: async (payload: CreateUrbanVillagePayload) => createUrbanVillage(payload),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['urbanVillages']});
+            queryClient.invalidateQueries({queryKey: ['urban-villages']});
         },
     });
 }

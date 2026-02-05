@@ -8,6 +8,7 @@ export const useCreateProduct = () => {
         mutationFn: (payload: CreateProductWithImagesPayload) => createProductWithImages(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['products', "partner"]});
+            queryClient.invalidateQueries({queryKey: ['products']});
         }
     })
 }

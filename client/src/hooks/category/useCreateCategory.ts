@@ -9,6 +9,7 @@ export const useCreateCategory = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['categories']});
             queryClient.invalidateQueries({queryKey: ['admin-categories']});
+            queryClient.invalidateQueries({queryKey: ['mega-menu-categories']});
         },
     })
 }
