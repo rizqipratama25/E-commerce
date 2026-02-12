@@ -34,6 +34,7 @@ import AddressPage from './pages/buyer/AddressPage.tsx'
 import PaymentMethodPage from './pages/buyer/PaymentMethodPage.tsx'
 import PaymentDetailPage from './pages/buyer/PaymentDetailPage.tsx'
 import { Toaster } from 'react-hot-toast'
+// import AdminChatListPage from './pages/admin/AdminChatListPage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
           { path: 'kecamatan', element: <DistrictPage /> },
           { path: 'kelurahan', element: <UrbanVillagePage /> },
           { path: 'jasa-pengiriman', element: <ShippingServicePage /> },
+          // { path: 'daftar-pesan', element: <AdminChatListPage /> },
         ]
       },
     ]

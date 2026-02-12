@@ -1,4 +1,4 @@
-import { LayoutDashboard, MapPin, MapPinHouse, MapPinned, Navigation, ShoppingCart, Tags, Truck, User } from "lucide-react"
+import { LayoutDashboard, MapPin, MapPinHouse, MapPinned, MessageCircleMore, Navigation, ShoppingCart, Tags, Truck, User } from "lucide-react"
 import HeaderAdminPartner from "../components/HeaderAdminPartner"
 import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
@@ -14,6 +14,7 @@ const menuItems = [
   { label: "Kecamatan", to: "/admin/kecamatan", icon: Navigation },
   { label: "Kelurahan", to: "/admin/kelurahan", icon: MapPinHouse },
   { label: "Jasa Pengiriman", to: "/admin/jasa-pengiriman", icon: Truck },
+//   { label: "Daftar Pesan", to: "/admin/daftar-pesan", icon: MessageCircleMore },
 ];
 
 const Admin = () => {

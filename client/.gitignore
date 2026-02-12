@@ -25,3 +25,6 @@ dist-ssr
 
 .env
 .env.prod
+
+/src/components/ChatWidget.tsx
+/src/pages/admin/AdminChatListPage.tsx

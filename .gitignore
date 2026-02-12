@@ -1,3 +1,4 @@
 /asset
 /typesense-data
 .env
+/chat_server

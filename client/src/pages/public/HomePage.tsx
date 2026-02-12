@@ -1,5 +1,6 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+// import ChatWidget from "../../components/ChatWidget";
 import slider1 from "../../assets/slider/slider-1.webp";
 import { useProducts } from "../../hooks/product/useProducts";
 import { NavLink } from "react-router-dom";
@@ -26,7 +27,7 @@ const HomePage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6">
                     {products.map((product, index) => (
                         <NavLink key={index} to={`/produk/${product.slug}`}>
-                            <div key={index} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
+                            <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
                                 <img
                                     src={`${product.thumbnail.image}`}
                                     alt={product.name}
@@ -44,18 +45,13 @@ const HomePage = () => {
                         </NavLink>
                     ))}
                 </div>
-
-                {/* Load More Button */}
-                {/* <div className="text-center">
-                    <button className="w-full py-3 border-2 rounded font-semibold hover:bg-orange-50" style={{ borderColor: '#F26A24', color: '#F26A24' }}>
-                        Muat lebih banyak produk
-                    </button>
-                </div> */}
             </main>
 
             <Footer />
+            
+            {/* <ChatWidget /> */}
         </div>
     );
 }
 
-export default HomePage
+export default HomePage;

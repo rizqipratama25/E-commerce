@@ -1,1 +1,3 @@
 *.sqlite*
+/migrations/2026_02_10_143653_create_chats_table.php
+/migrations/2026_02_10_143819_create_messages_table.php
