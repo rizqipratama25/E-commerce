@@ -4,6 +4,7 @@
 ## 1. Install Ngrok
 Download dan install Ngrok dari website resmi: https://ngrok.com/download
 Pastikan setelah install kamu bisa menjalankan:
+
 ```bash
 ngrok --version
 ```
@@ -33,4 +34,28 @@ ngrok config add-authtoken 2abc123xyz456example
 Jika berhasil, kamu akan melihat pesan bahwa authtoken telah ditambahkan.
 Sekarang Ngrok sudah terinstall dan terkonfigurasi dengan benar
 
-# Insatalasi Docker
+# Insatalasi dan Konfigurasi Docker
+## 1. Install WSL
+Silahkan tonton video tutorial instalasi WSL ini : https://youtu.be/zqw4EsSMMf4?si=4GoShx_ie1TOZjAl
+
+## 2. Install Docker
+Silahkan tonton video tutorial instalasi dan konfigurasi docker ini : https://youtu.be/t1qdBtJWJWU?si=dsLfVxbJwkMQ9shr
+
+# Cara menjalankan Proyek
+1. Buka docker desktop
+2. Buka folder project di terminal
+3. Jalankan perintah ini
+```bash
+mkdir typesense-data
+```
+4. Lalu jalankan perintah
+```bash
+docker-compose build
+```
+Ini akan membutuhkan waktu yang sedikit lama
+5. Setelah itu jalankan perintah
+``` bash
+docker-compose up
+```
+6. Lalu buka port localhost:5173 di browser
+7. Proyek sudah jalan
